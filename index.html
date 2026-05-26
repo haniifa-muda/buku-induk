@@ -74,17 +74,17 @@
     <div class="col-md-4 mb-3">
       <div class="card p-3 shadow">
         <h5>Total Data</h5>
-        <h2 id="totalSiswa">0</h2>
+        <h2 id="totalAlumni">0</h2>
       </div>
     </div>
 
   </div>
 
-  <!-- 🔥 REKAP KOORDINATOR -->
-  <h5 class="mt-4 mb-3">📍 Rekap Koordinator</h5>
+  <!-- GRAFIK KOORDINATOR -->
+  <h5 class="mt-4 mb-3">📊 Grafik Koordinator</h5>
 
-  <div class="row" id="koordinatorRekap">
-    <!-- otomatis diisi dari JS -->
+  <div class="card p-3 shadow">
+    <canvas id="chartKoordinator"></canvas>
   </div>
 
 </div>
@@ -239,6 +239,10 @@
     </select>
   </div>
 
+  <button onclick="cetakRekap()" class="btn btn-success mb-3">
+    🖨 Cetak Hasil Filter
+  </button>
+
   <div class="table-responsive">
     <table class="table table-bordered table-striped">
 
@@ -280,6 +284,8 @@
   <div class="spinner-border text-light" role="status"></div>
   <p class="mt-3 text-white fw-bold">Loading...</p>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </body>
 </html>
