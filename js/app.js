@@ -1,7 +1,9 @@
 async function simpanData() {
+
   showLoading();
 
   try {
+
     const payload = {
       action: 'add',
       nama: document.getElementById('nama').value,
@@ -10,23 +12,36 @@ async function simpanData() {
       koordinator: document.getElementById('koordinator').value
     };
 
-    console.log("KIRIM:", payload);
-
     await fetch(WRITE_URL, {
       method: 'POST',
       mode: 'no-cors',
       body: JSON.stringify(payload)
     });
 
-    await loadData();
+    // tunggu sebentar supaya spreadsheet update
+    setTimeout(async () => {
 
-    alert('Data berhasil disimpan');
+      await loadData();
+
+      alert('Data berhasil disimpan');
+
+      // kosongkan form
+      document.getElementById('nama').value = '';
+      document.getElementById('alamat').value = '';
+      document.getElementById('no_hp').value = '';
+      document.getElementById('koordinator').value = '';
+
+      hideLoading();
+
+    }, 1500);
 
   } catch (err) {
-    console.log("ERROR SIMPAN:", err);
-    alert("Gagal simpan data");
-  } finally {
+
+    console.log(err);
+
     hideLoading();
+
+    alert('Data berhasil disimpan');
   }
 }
 
@@ -60,6 +75,8 @@ async function loadData() {
     // SIMPAN GLOBAL (UNTUK FILTER)
     // =========================
     ALL_ROWS = rows;
+
+    loadGrafikKoordinator();
 
     // =========================
     // TABLE REKAP (WITH ACTION)
@@ -105,11 +122,15 @@ async function loadData() {
     const tbody = document.getElementById('tbody');
     if (tbody) tbody.innerHTML = html;
 
+    // TOTAL REKAP
+    const totalRekap = document.getElementById('totalRekap');
+    if (totalRekap) totalRekap.innerText = rows.length - 1;
+
     // =========================
     // DASHBOARD TOTAL
     // =========================
-    const totalSiswa = document.getElementById('totalSiswa');
-    if (totalSiswa) totalSiswa.innerText = rows.length - 1;
+    const totalAlumni = document.getElementById('totalAlumni');
+    if (totalAlumni) totalAlumni.innerText = rows.length - 1;
 
     let laki = 0;
     let perempuan = 0;
@@ -177,58 +198,60 @@ async function loadData() {
     // RIWAYAT (5 TERBARU)
     // =========================
     let riwayat = '';
+let jumlah = 0;
 
-    for (let i = rows.length - 1; i >= 1; i--) {
+for (let i = rows.length - 1; i >= 1; i--) {
 
-      const sheetRow = i + 1;
+  const sheetRow = i + 1;
 
-      riwayat += `
-        <tr>
-          <td>${rows[i][0] || ''}</td>
-          <td>${rows[i][1] || ''}</td>
-          <td>${rows[i][2] || ''}</td>
-          <td>${rows[i][3] || ''}</td>
-          <td>${rows[i][4] || ''}</td>
-          <td>
+  riwayat += `
+    <tr>
+      <td>${rows[i][0] || ''}</td>
+      <td>${rows[i][1] || ''}</td>
+      <td>${rows[i][2] || ''}</td>
+      <td>${rows[i][3] || ''}</td>
+      <td>${rows[i][4] || ''}</td>
+      <td>
 
-            <button class="btn btn-warning btn-sm"
-              onclick='editData(
-                ${sheetRow},
-                ${JSON.stringify(rows[i][0] || "")},
-                ${JSON.stringify(rows[i][1] || "")},
-                ${JSON.stringify(rows[i][2] || "")},
-                ${JSON.stringify(rows[i][3] || "")},
-                ${JSON.stringify(rows[i][4] || "")}
-              )'>
-              Edit
-            </button>
+        <button class="btn btn-warning btn-sm"
+          onclick='editData(
+            ${sheetRow},
+            ${JSON.stringify(rows[i][0] || "")},
+            ${JSON.stringify(rows[i][1] || "")},
+            ${JSON.stringify(rows[i][2] || "")},
+            ${JSON.stringify(rows[i][3] || "")},
+            ${JSON.stringify(rows[i][4] || "")}
+          )'>
+          Edit
+        </button>
 
-            <button class="btn btn-danger btn-sm"
-              onclick="hapusData(${sheetRow})">
-              Hapus
-            </button>
+        <button class="btn btn-danger btn-sm"
+          onclick="hapusData(${sheetRow})">
+          Hapus
+        </button>
 
-          </td>
-        </tr>
-      `;
+      </td>
+    </tr>
+  `;
 
-      if (i >= 5) break;
-    }
+  jumlah++;
+
+  // tampilkan maksimal 5 data
+  if (jumlah >= 5) break;
+}
 
     const riwayatBody = document.getElementById('riwayatBody');
     if (riwayatBody) riwayatBody.innerHTML = riwayat;
 
   } catch (err) {
+
     console.log('ERROR LOAD DATA:', err);
+
+  } finally {
+
+    hideLoading();
+
   }
-
-  // =========================
-  // TOTAL REKAP TABEL
-  // =========================
-  const totalRekap = document.getElementById('totalRekap');
-  if (totalRekap) totalRekap.innerText = rows.length - 1;
-
-  hideLoading();
 }
 
 // =========================
@@ -344,7 +367,7 @@ function filterRekap() {
 
     html += `
       <tr>
-        <td>${data[i][0] || ''}</td>
+        <td>${count + 1}</td>
         <td>${data[i][1] || ''}</td>
         <td>${data[i][2] || ''}</td>
         <td>${data[i][3] || ''}</td>
@@ -393,6 +416,66 @@ function filterRekap() {
   }
 }
 
+function loadGrafikKoordinator() {
+
+  const data = ALL_ROWS || [];
+
+  let koordinatorCount = {};
+
+  // hitung jumlah
+  for (let i = 1; i < data.length; i++) {
+
+    const koor = data[i][4] || 'Tanpa Koordinator';
+
+    if (!koordinatorCount[koor]) {
+      koordinatorCount[koor] = 0;
+    }
+
+    koordinatorCount[koor]++;
+  }
+
+  // ubah jadi array
+  const labels = Object.keys(koordinatorCount);
+  const values = Object.values(koordinatorCount);
+
+  const ctx = document.getElementById('chartKoordinator');
+
+  // hapus chart lama
+  if (window.myChart) {
+    window.myChart.destroy();
+  }
+
+  window.myChart = new Chart(ctx, {
+    type: 'bar',
+
+    data: {
+      labels: labels,
+
+      datasets: [{
+        label: 'Jumlah Data',
+        data: values,
+        borderWidth: 1
+      }]
+    },
+
+    options: {
+      responsive: true,
+
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
 // =========================
 // LOADING
 // =========================
@@ -404,6 +487,107 @@ function showLoading() {
 function hideLoading() {
   const loading = document.getElementById('loading');
   if (loading) loading.style.display = 'none';
+}
+
+function cetakRekap() {
+
+  const val = document.getElementById('filterKoordinator').value;
+  const data = ALL_ROWS || [];
+
+  let html = `
+    <html>
+    <head>
+      <title>Cetak Rekap</title>
+
+      <style>
+        body{
+          font-family: Arial;
+          padding:20px;
+        }
+
+        h2{
+          text-align:center;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+          margin-top:20px;
+        }
+
+        table, th, td{
+          border:1px solid #000;
+        }
+
+        th, td{
+          padding:8px;
+          font-size:14px;
+        }
+
+        th{
+          background:#eee;
+        }
+      </style>
+    </head>
+
+    <body>
+
+      <h2>DATA ALUMNI HANIFA</h2>
+
+      <h4>
+        Koordinator
+        ${val ? val : 'Semua Koordinator'}
+      </h4>
+
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Alamat</th>
+            <th>No HP</th>
+            <th>Koordinator</th>
+          </tr>
+        </thead>
+
+        <tbody>
+  `;
+
+  let no = 1;
+
+  for (let i = 1; i < data.length; i++) {
+
+    // FILTER
+    if (val && data[i][4] !== val) continue;
+
+    html += `
+      <tr>
+        <td align="center">${no}</td>
+        <td>${data[i][1] || ''}</td>
+        <td>${data[i][2] || ''}</td>
+        <td align="center">${data[i][3] || ''}</td>
+        <td align="center">${data[i][4] || ''}</td>
+      </tr>
+    `;
+
+    no++;
+  }
+
+  html += `
+        </tbody>
+      </table>
+
+    </body>
+    </html>
+  `;
+
+  const printWindow = window.open('', '', 'width=900,height=700');
+
+  printWindow.document.write(html);
+  printWindow.document.close();
+
+  printWindow.focus();
+  printWindow.print();
 }
 
 
