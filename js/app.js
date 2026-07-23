@@ -50,6 +50,7 @@ async function simpanData() {
 // LOAD DATA
 // =========================
 let ALL_ROWS = []; // 🔥 WAJIB GLOBAL
+let DATA_KOORDINATOR = []; // 🔥 GLOBAL KOORDINATOR
 
 async function loadData() {
 
@@ -587,7 +588,7 @@ async function simpanKoordinator() {
 
     setTimeout(async () => {
       await loadData();
-      await muatDataKoordinator(); // 🔥 Refresh data koordinator
+      await muatDataKoordinator();
       alert('Data Koordinator berhasil disimpan!');
       
       namaInput.value = '';
@@ -612,6 +613,8 @@ async function muatDataKoordinator() {
     const response = await fetch(url);
     const result = await response.json();
     const rows = result.values || [];
+
+    DATA_KOORDINATOR = rows; // Simpan ka variabel global pikeun fungsi cetak
 
     if (rows.length <= 1) {
       tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data koordinator dina Spreadsheet.</td></tr>`;
@@ -734,6 +737,69 @@ async function hapusKoordinatorPrompt(namaKoor) {
     console.log(err);
     hideLoading();
   }
+}
+
+// 🔥 6. FUNGSI CETAK KOORDINATOR
+function cetakKoordinator() {
+  const data = DATA_KOORDINATOR || [];
+
+  if (data.length <= 1) {
+    alert("Teu aya data koordinator pikeun dicetak.");
+    return;
+  }
+
+  let html = `
+    <html>
+    <head>
+      <title>Cetak Data Koordinator</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h2 { text-align: center; margin-bottom: 5px; }
+        h4 { text-align: center; color: #555; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid #000; }
+        th, td { padding: 10px; font-size: 14px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        td.center, th.center { text-align: center; }
+      </style>
+    </head>
+    <body>
+      <h2>DAFTAR KOORDINATOR & PJ</h2>
+      <h4>Buku Induk Alumni Hanifa</h4>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="center" style="width: 10%;">No</th>
+            <th style="width: 45%;">Koordinator / Wilayah</th>
+            <th style="width: 45%;">Penanggung Jawab (PJ)</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  for (let i = 1; i < data.length; i++) {
+    html += `
+      <tr>
+        <td class="center">${i}</td>
+        <td>${data[i][1] || '-'}</td>
+        <td>${data[i][2] || '-'}</td>
+      </tr>
+    `;
+  }
+
+  html += `
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const printWindow = window.open('', '', 'width=800,height=600');
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
 }
 
 // INIT (Muat data dina awal)
