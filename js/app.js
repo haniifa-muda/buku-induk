@@ -630,7 +630,12 @@ function muatDataKoordinator() {
   tbody.innerHTML = html;
 }
 
-function simpanKoordinator() {
+// =========================================================
+// 🔥 BAGIAN HALAMAN KOORDINATOR (CONNECTED TO GOOGLE SHEETS)
+// =========================================================
+
+// 1. SIMPAN KOORDINATOR KA SPREADSHEET
+async function simpanKoordinator() {
   const namaInput = document.getElementById('namaKoordinator');
   const pjInput = document.getElementById('pjKoordinator');
 
@@ -647,55 +652,136 @@ function simpanKoordinator() {
     return;
   }
 
-  DATA_KOORDINATOR.push({ koordinator: nama, pj: pj });
+  showLoading();
 
-  namaInput.value = '';
-  pjInput.value = '';
+  try {
+    const payload = {
+      action: 'addKoordinator', // action khusus koordinator
+      koordinator: nama,
+      pj: pj
+    };
 
-  alert('Data Koordinator berhasil disimpan!');
-  muatDataKoordinator();
-}
+    await fetch(WRITE_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(payload)
+    });
 
-function persiapkanEditKoordinator(index) {
-  const item = DATA_KOORDINATOR[index];
+    setTimeout(async () => {
+      await loadData(); // Reload data ti spreadsheet
+      alert('Data Koordinator berhasil disimpan!');
+      
+      namaInput.value = '';
+      pjInput.value = '';
+      hideLoading();
+    }, 1500);
 
-  document.getElementById('edit_koordinator_id').value = index;
-  document.getElementById('edit_namaKoordinator').value = item.koordinator;
-  document.getElementById('edit_pjKoordinator').value = item.pj;
-
-  const box = document.getElementById('editKoordinatorBox');
-  if (box) {
-    box.style.display = 'block';
-    box.scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    console.log(err);
+    hideLoading();
+    alert('Gagal nyimpen data koordinator');
   }
 }
 
-function updateKoordinator() {
-  const index = document.getElementById('edit_koordinator_id').value;
-  const nama = document.getElementById('edit_namaKoordinator').value.trim();
-  const pj = document.getElementById('edit_pjKoordinator').value.trim();
+// 2. MUAT DATA KOORDINATOR TI GOOGLE SHEETS
+function muatDataKoordinator() {
+  const tbody = document.getElementById('koordinatorBody');
+  if (!tbody) return;
 
-  if (!nama) {
-    alert('Nama Koordinator tidak boleh kosong!');
+  const data = ALL_ROWS || [];
+  
+  // Ngalumpukkeun Koordinator unik ti Sheets atawa ti Sheet/Tab Koordinator
+  let setKoordinator = new Map();
+
+  for (let i = 1; i < data.length; i++) {
+    let koorName = data[i][4] || '';
+    if (koorName && !setKoordinator.has(koorName)) {
+      setKoordinator.set(koorName, '-'); // Default PJ pami teu acan aya kolom PJ
+    }
+  }
+
+  if (setKoordinator.size === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data koordinator dina Spreadsheet.</td></tr>`;
     return;
   }
 
-  DATA_KOORDINATOR[index] = { koordinator: nama, pj: pj };
+  let html = '';
+  let index = 1;
+  
+  setKoordinator.forEach((pj, koor) => {
+    html += `
+      <tr>
+        <td class="fw-bold">${index}</td>
+        <td>${koor}</td>
+        <td>${pj}</td>
+        <td>
+          <button type="button" class="btn btn-warning btn-sm me-1" onclick="editKoordinatorPrompt('${koor}')">
+            Edit
+          </button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="hapusKoordinatorPrompt('${koor}')">
+            Hapus
+          </button>
+        </td>
+      </tr>
+    `;
+    index++;
+  });
 
-  batalEditKoordinator();
-  alert('Data Koordinator berhasil diperbarui!');
-  muatDataKoordinator();
+  tbody.innerHTML = html;
 }
 
-function batalEditKoordinator() {
-  const box = document.getElementById('editKoordinatorBox');
-  if (box) box.style.display = 'none';
+// 3. EDIT & HAPUS KOORDINATOR PROMPT
+async function editKoordinatorPrompt(namaLama) {
+  const namaBaru = prompt('Edit Nama Koordinator:', namaLama);
+  if (!namaBaru || namaBaru.trim() === namaLama) return;
+
+  showLoading();
+
+  try {
+    await fetch(WRITE_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        action: 'editKoordinator',
+        koordinatorLama: namaLama,
+        koordinatorBaru: namaBaru.trim()
+      })
+    });
+
+    setTimeout(async () => {
+      await loadData();
+      alert('Data Koordinator berhasil di-update!');
+      hideLoading();
+    }, 1500);
+  } catch (err) {
+    console.log(err);
+    hideLoading();
+  }
 }
 
-function hapusKoordinator(index) {
-  if (confirm('Yakin ingin menghapus koordinator ini?')) {
-    DATA_KOORDINATOR.splice(index, 1);
-    muatDataKoordinator();
+async function hapusKoordinatorPrompt(namaKoor) {
+  if (!confirm(`Yakin hoyong ngahapus Koordinator "${namaKoor}"?`)) return;
+
+  showLoading();
+
+  try {
+    await fetch(WRITE_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        action: 'deleteKoordinator',
+        koordinator: namaKoor
+      })
+    });
+
+    setTimeout(async () => {
+      await loadData();
+      alert('Data Koordinator berhasil dihapus!');
+      hideLoading();
+    }, 1500);
+  } catch (err) {
+    console.log(err);
+    hideLoading();
   }
 }
 
