@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <!-- 🔥 Viewport penting pisan supados responsive di HP -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buku Induk Hanifa</title>
 
@@ -49,6 +48,15 @@
           </a>
         </li>
 
+        <!-- MENU KOORDINATOR ANU BARU -->
+        <li class="nav-item">
+          <a class="nav-link"
+             href="javascript:void(0)"
+             onclick="tampilHalaman('koordinatorPage', this)">
+            Koordinator
+          </a>
+        </li>
+
         <li class="nav-item">
           <a class="nav-link"
              href="javascript:void(0)"
@@ -62,7 +70,7 @@
   </div>
 </nav>
 
-<!-- CONTAINER UTAMA (Ditambah pt-5 supados teu katutupan fixed-top navbar) -->
+<!-- CONTAINER UTAMA -->
 <div class="container pt-5 mt-3 mt-lg-4 mb-5">
 
   <!-- ================= DASHBOARD ================= -->
@@ -70,7 +78,6 @@
 
     <h3 class="mb-4 fw-bold">📊 Dashboard</h3>
 
-    <!-- CARD UTAMA -->
     <div class="row g-3">
       <div class="col-12 col-md-4">
         <div class="card p-3 shadow-sm border-0">
@@ -80,7 +87,6 @@
       </div>
     </div>
 
-    <!-- GRAFIK KOORDINATOR -->
     <h5 class="mt-4 mb-3 fw-bold">📊 Grafik Koordinator</h5>
 
     <div class="card p-3 shadow-sm border-0">
@@ -91,32 +97,28 @@
 
   </div>
 
-  <!-- ================= INPUT ================= -->
+  <!-- ================= INPUT DATA ALUMNI/JAMAAH ================= -->
   <div id="inputPage" style="display:none;">
 
     <h3 class="mb-3 fw-bold">📝 Input Data</h3>
 
     <div class="card p-3 p-md-4 mb-4 shadow-sm border-0">
 
-      <!-- NAMA -->
       <div class="mb-3">
         <label class="form-label fw-semibold">Nama</label>
         <input type="text" id="nama" class="form-control" placeholder="Eusian nama lengkap">
       </div>
 
-      <!-- ALAMAT -->
       <div class="mb-3">
         <label class="form-label fw-semibold">Alamat</label>
         <textarea id="alamat" class="form-control" rows="3" placeholder="Eusian alamat lengkap"></textarea>
       </div>
 
-      <!-- NO HP -->
       <div class="mb-3">
         <label class="form-label fw-semibold">No HP</label>
         <input type="tel" id="no_hp" class="form-control" placeholder="Contoh: 08123456789">
       </div>
 
-      <!-- KOORDINATOR -->
       <div class="mb-3">
         <label class="form-label fw-semibold">Koordinator</label>
         <select id="koordinator" class="form-select">
@@ -139,7 +141,6 @@
         </select>
       </div>
 
-      <!-- BUTTON -->
       <button onclick="simpanData()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
         Simpan
       </button>
@@ -169,7 +170,80 @@
 
   </div>
 
-  <!-- EDIT MODAL / FORM -->
+  <!-- ================= HALAMAN KOORDINATOR (BARU) ================= -->
+  <div id="koordinatorPage" style="display:none;">
+
+    <h3 class="mb-3 fw-bold">👥 Data Koordinator</h3>
+
+    <!-- FORM INPUT KOORDINATOR -->
+    <div class="card p-3 p-md-4 mb-4 shadow-sm border-0">
+      <h5 class="fw-bold mb-3">Tambah Koordinator</h5>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Nama Koordinator / Wilayah</label>
+        <input type="text" id="namaKoordinator" class="form-control" placeholder="Contoh: Cilemor Pusat">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Penanggung Jawab (PJ)</label>
+        <input type="text" id="pjKoordinator" class="form-control" placeholder="Eusian nama PJ">
+      </div>
+
+      <button onclick="simpanKoordinator()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
+        Simpan Koordinator
+      </button>
+    </div>
+
+    <!-- TABEL DATA KOORDINATOR -->
+    <div class="card shadow-sm border-0 p-3 mb-4">
+      <h5 class="mb-3 fw-bold">📋 Daftar Koordinator & PJ</h5>
+
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th style="width: 10%;">No</th>
+              <th style="width: 45%;">Koordinator</th>
+              <th style="width: 30%;">PJ</th>
+              <th style="width: 15%;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="koordinatorBody">
+            <!-- Contoh Tampilan Statis/Dinamis ku JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FORM EDIT KOORDINATOR (MODAL/BOX) -->
+  <div id="editKoordinatorBox" style="display:none;" class="card p-3 p-md-4 shadow-sm border-0 mt-4">
+    <h5 class="fw-bold mb-3">Edit Data Koordinator</h5>
+
+    <input type="hidden" id="edit_koordinator_id">
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Nama Koordinator</label>
+      <input type="text" id="edit_namaKoordinator" class="form-control">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Penanggung Jawab (PJ)</label>
+      <input type="text" id="edit_pjKoordinator" class="form-control">
+    </div>
+
+    <div class="d-flex gap-2">
+      <button onclick="updateKoordinator()" class="btn btn-success w-100 w-md-auto py-2 fw-bold">
+        Update
+      </button>
+      <button onclick="batalEditKoordinator()" class="btn btn-secondary w-100 w-md-auto py-2 fw-bold">
+        Batal
+      </button>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL / FORM ALUMNI -->
   <div id="editBox" style="display:none;" class="card p-3 p-md-4 shadow-sm border-0 mt-4">
 
     <h5 class="fw-bold mb-3">Edit Data</h5>
