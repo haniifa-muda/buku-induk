@@ -198,47 +198,47 @@ async function loadData() {
     // RIWAYAT (5 TERBARU)
     // =========================
     let riwayat = '';
-let jumlah = 0;
+    let jumlah = 0;
 
-for (let i = rows.length - 1; i >= 1; i--) {
+    for (let i = rows.length - 1; i >= 1; i--) {
 
-  const sheetRow = i + 1;
+      const sheetRow = i + 1;
 
-  riwayat += `
-    <tr>
-      <td>${rows[i][0] || ''}</td>
-      <td>${rows[i][1] || ''}</td>
-      <td>${rows[i][2] || ''}</td>
-      <td>${rows[i][3] || ''}</td>
-      <td>${rows[i][4] || ''}</td>
-      <td>
+      riwayat += `
+        <tr>
+          <td>${rows[i][0] || ''}</td>
+          <td>${rows[i][1] || ''}</td>
+          <td>${rows[i][2] || ''}</td>
+          <td>${rows[i][3] || ''}</td>
+          <td>${rows[i][4] || ''}</td>
+          <td>
 
-        <button class="btn btn-warning btn-sm"
-          onclick='editData(
-            ${sheetRow},
-            ${JSON.stringify(rows[i][0] || "")},
-            ${JSON.stringify(rows[i][1] || "")},
-            ${JSON.stringify(rows[i][2] || "")},
-            ${JSON.stringify(rows[i][3] || "")},
-            ${JSON.stringify(rows[i][4] || "")}
-          )'>
-          Edit
-        </button>
+            <button class="btn btn-warning btn-sm"
+              onclick='editData(
+                ${sheetRow},
+                ${JSON.stringify(rows[i][0] || "")},
+                ${JSON.stringify(rows[i][1] || "")},
+                ${JSON.stringify(rows[i][2] || "")},
+                ${JSON.stringify(rows[i][3] || "")},
+                ${JSON.stringify(rows[i][4] || "")}
+              )'>
+              Edit
+            </button>
 
-        <button class="btn btn-danger btn-sm"
-          onclick="hapusData(${sheetRow})">
-          Hapus
-        </button>
+            <button class="btn btn-danger btn-sm"
+              onclick="hapusData(${sheetRow})">
+              Hapus
+            </button>
 
-      </td>
-    </tr>
-  `;
+          </td>
+        </tr>
+      `;
 
-  jumlah++;
+      jumlah++;
 
-  // tampilkan maksimal 5 data
-  if (jumlah >= 5) break;
-}
+      // tampilkan maksimal 5 data
+      if (jumlah >= 5) break;
+    }
 
     const riwayatBody = document.getElementById('riwayatBody');
     if (riwayatBody) riwayatBody.innerHTML = riwayat;
@@ -590,6 +590,110 @@ function cetakRekap() {
   printWindow.print();
 }
 
+// =========================================================
+// 🔥 BAGIAN HALAMAN KOORDINATOR (CRUD KOORDINATOR)
+// =========================================================
+
+// Memory temporary data (Catetan: Lamun di-refresh bakal balik ka default ieu/bisa disambungkeun kana Sheet)
+let DATA_KOORDINATOR = [
+  { koordinator: 'Cilemor Pusat', pj: 'Ust. Ahmad' },
+  { koordinator: 'Cilemor Kaler', pj: 'Bpk. Cecep' },
+  { koordinator: 'Pamarican Desakolot', pj: 'Kang Dadang' }
+];
+
+function muatDataKoordinator() {
+  const tbody = document.getElementById('koordinatorBody');
+  if (!tbody) return;
+
+  if (DATA_KOORDINATOR.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data koordinator.</td></tr>`;
+    return;
+  }
+
+  let html = '';
+  DATA_KOORDINATOR.forEach((item, index) => {
+    html += `
+      <tr>
+        <td class="fw-bold">${index + 1}</td>
+        <td>${item.koordinator}</td>
+        <td>${item.pj || '-'}</td>
+        <td>
+          <button class="btn btn-warning btn-sm me-1" onclick="persiapkanEditKoordinator(${index})">
+            Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="hapusKoordinator(${index})">
+            Hapus
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+function simpanKoordinator() {
+  const namaInput = document.getElementById('namaKoordinator');
+  const pjInput = document.getElementById('pjKoordinator');
+
+  const nama = namaInput ? namaInput.value.trim() : '';
+  const pj = pjInput ? pjInput.value.trim() : '';
+
+  if (!nama) {
+    alert('Nama Koordinator / Wilayah harus diisi!');
+    return;
+  }
+
+  DATA_KOORDINATOR.push({ koordinator: nama, pj: pj });
+
+  if (namaInput) namaInput.value = '';
+  if (pjInput) pjInput.value = '';
+
+  alert('Data Koordinator berhasil disimpan!');
+  muatDataKoordinator();
+}
+
+function persiapkanEditKoordinator(index) {
+  const item = DATA_KOORDINATOR[index];
+
+  document.getElementById('edit_koordinator_id').value = index;
+  document.getElementById('edit_namaKoordinator').value = item.koordinator;
+  document.getElementById('edit_pjKoordinator').value = item.pj;
+
+  const box = document.getElementById('editKoordinatorBox');
+  if (box) {
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function updateKoordinator() {
+  const index = document.getElementById('edit_koordinator_id').value;
+  const nama = document.getElementById('edit_namaKoordinator').value.trim();
+  const pj = document.getElementById('edit_pjKoordinator').value.trim();
+
+  if (!nama) {
+    alert('Nama Koordinator tidak boleh kosong!');
+    return;
+  }
+
+  DATA_KOORDINATOR[index] = { koordinator: nama, pj: pj };
+
+  batalEditKoordinator();
+  alert('Data Koordinator berhasil diperbarui!');
+  muatDataKoordinator();
+}
+
+function batalEditKoordinator() {
+  const box = document.getElementById('editKoordinatorBox');
+  if (box) box.style.display = 'none';
+}
+
+function hapusKoordinator(index) {
+  if (confirm('Yakin ingin menghapus koordinator ini?')) {
+    DATA_KOORDINATOR.splice(index, 1);
+    muatDataKoordinator();
+  }
+}
 
 // INIT
 loadData();
