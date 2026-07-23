@@ -591,46 +591,6 @@ function cetakRekap() {
 }
 
 // =========================================================
-// 🔥 BAGIAN HALAMAN KOORDINATOR (CRUD KOORDINATOR)
-// =========================================================
-
-let DATA_KOORDINATOR = [
-  { koordinator: 'Cilemor Pusat', pj: 'Ust. Ahmad' },
-  { koordinator: 'Cilemor Kaler', pj: 'Bpk. Cecep' },
-  { koordinator: 'Pamarican Desakolot', pj: 'Kang Dadang' }
-];
-
-function muatDataKoordinator() {
-  const tbody = document.getElementById('koordinatorBody');
-  if (!tbody) return;
-
-  if (DATA_KOORDINATOR.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data koordinator.</td></tr>`;
-    return;
-  }
-
-  let html = '';
-  DATA_KOORDINATOR.forEach((item, index) => {
-    html += `
-      <tr>
-        <td class="fw-bold">${index + 1}</td>
-        <td>${item.koordinator}</td>
-        <td>${item.pj || '-'}</td>
-        <td>
-          <button type="button" class="btn btn-warning btn-sm me-1" onclick="persiapkanEditKoordinator(${index})">
-            Edit
-          </button>
-          <button type="button" class="btn btn-danger btn-sm" onclick="hapusKoordinator(${index})">
-            Hapus
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-  tbody.innerHTML = html;
-}
-
-// =========================================================
 // 🔥 BAGIAN HALAMAN KOORDINATOR (CONNECTED TO GOOGLE SHEETS)
 // =========================================================
 
@@ -656,7 +616,7 @@ async function simpanKoordinator() {
 
   try {
     const payload = {
-      action: 'addKoordinator', // action khusus koordinator
+      action: 'addKoordinator',
       koordinator: nama,
       pj: pj
     };
@@ -668,7 +628,7 @@ async function simpanKoordinator() {
     });
 
     setTimeout(async () => {
-      await loadData(); // Reload data ti spreadsheet
+      await loadData();
       alert('Data Koordinator berhasil disimpan!');
       
       namaInput.value = '';
@@ -690,13 +650,12 @@ function muatDataKoordinator() {
 
   const data = ALL_ROWS || [];
   
-  // Ngalumpukkeun Koordinator unik ti Sheets atawa ti Sheet/Tab Koordinator
   let setKoordinator = new Map();
 
   for (let i = 1; i < data.length; i++) {
     let koorName = data[i][4] || '';
     if (koorName && !setKoordinator.has(koorName)) {
-      setKoordinator.set(koorName, '-'); // Default PJ pami teu acan aya kolom PJ
+      setKoordinator.set(koorName, '-');
     }
   }
 
@@ -785,8 +744,7 @@ async function hapusKoordinatorPrompt(namaKoor) {
   }
 }
 
-// INIT (Muat data alumni sareng koordinator dina awal)
+// INIT (Muat data dina awal)
 document.addEventListener("DOMContentLoaded", function() {
   loadData();
-  muatDataKoordinator();
 });
