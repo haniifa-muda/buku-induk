@@ -594,7 +594,7 @@ function cetakRekap() {
 // 🔥 BAGIAN HALAMAN KOORDINATOR (CONNECTED TO GOOGLE SHEETS)
 // =========================================================
 
-// 1. SIMPAN KOORDINATOR KA SPREADSHEET
+// SIMPAN KOORDINATOR KA SPREADSHEET
 async function simpanKoordinator() {
   const namaInput = document.getElementById('namaKoordinator');
   const pjInput = document.getElementById('pjKoordinator');
@@ -627,8 +627,10 @@ async function simpanKoordinator() {
       body: JSON.stringify(payload)
     });
 
+    // ⬇️ DISIMPEN DINA BAGIAN IEU ⬇️
     setTimeout(async () => {
       await loadData();
+      await muatDataKoordinator(); // 🔥 Ngamuat deui data koordinator saatos simpan
       alert('Data Koordinator berhasil disimpan!');
       
       namaInput.value = '';
@@ -643,50 +645,48 @@ async function simpanKoordinator() {
   }
 }
 
-// 2. MUAT DATA KOORDINATOR TI GOOGLE SHEETS
-function muatDataKoordinator() {
+// 2. MUAT DATA KOORDINATOR TI TAB KOORDINATOR (SPREADSHEET)
+async function muatDataKoordinator() {
   const tbody = document.getElementById('koordinatorBody');
   if (!tbody) return;
 
-  const data = ALL_ROWS || [];
-  
-  let setKoordinator = new Map();
+  try {
+    // Muka Sheet 'Koordinator' langsung ti Google Sheets API
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Koordinator!A:C?key=${API_KEY}`;
+    const response = await fetch(url);
+    const result = await response.json();
+    const rows = result.values || [];
 
-  for (let i = 1; i < data.length; i++) {
-    let koorName = data[i][4] || '';
-    if (koorName && !setKoordinator.has(koorName)) {
-      setKoordinator.set(koorName, '-');
+    if (rows.length <= 1) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data koordinator dina Spreadsheet.</td></tr>`;
+      return;
     }
+
+    let html = '';
+    for (let i = 1; i < rows.length; i++) {
+      const koor = rows[i][1] || '';
+      const pj = rows[i][2] || '-';
+      
+      html += `
+        <tr>
+          <td class="fw-bold">${i}</td>
+          <td>${koor}</td>
+          <td>${pj}</td>
+          <td>
+            <button type="button" class="btn btn-warning btn-sm me-1" onclick="editKoordinatorPrompt('${koor}')">
+              Edit
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="hapusKoordinatorPrompt('${koor}')">
+              Hapus
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+    tbody.innerHTML = html;
+  } catch (err) {
+    console.log("Error muat data koordinator:", err);
   }
-
-  if (setKoordinator.size === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data koordinator dina Spreadsheet.</td></tr>`;
-    return;
-  }
-
-  let html = '';
-  let index = 1;
-  
-  setKoordinator.forEach((pj, koor) => {
-    html += `
-      <tr>
-        <td class="fw-bold">${index}</td>
-        <td>${koor}</td>
-        <td>${pj}</td>
-        <td>
-          <button type="button" class="btn btn-warning btn-sm me-1" onclick="editKoordinatorPrompt('${koor}')">
-            Edit
-          </button>
-          <button type="button" class="btn btn-danger btn-sm" onclick="hapusKoordinatorPrompt('${koor}')">
-            Hapus
-          </button>
-        </td>
-      </tr>
-    `;
-    index++;
-  });
-
-  tbody.innerHTML = html;
 }
 
 // 3. EDIT & HAPUS KOORDINATOR PROMPT
