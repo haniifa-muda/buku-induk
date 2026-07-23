@@ -48,7 +48,7 @@
           </a>
         </li>
 
-        <!-- MENU KOORDINATOR ANU BARU -->
+        <!-- MENU KOORDINATOR -->
         <li class="nav-item">
           <a class="nav-link"
              href="javascript:void(0)"
@@ -141,7 +141,7 @@
         </select>
       </div>
 
-      <button onclick="simpanData()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
+      <button type="button" onclick="simpanData()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
         Simpan
       </button>
 
@@ -170,7 +170,7 @@
 
   </div>
 
-  <!-- ================= HALAMAN KOORDINATOR (BARU) ================= -->
+  <!-- ================= HALAMAN KOORDINATOR ================= -->
   <div id="koordinatorPage" style="display:none;">
 
     <h3 class="mb-3 fw-bold">👥 Data Koordinator</h3>
@@ -189,7 +189,8 @@
         <input type="text" id="pjKoordinator" class="form-control" placeholder="Eusian nama PJ">
       </div>
 
-      <button onclick="simpanKoordinator()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
+      <!-- 🔥 Tambih type="button" supados fungsi click langsung ngajalankeun simpanKoordinator() -->
+      <button type="button" onclick="simpanKoordinator()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
         Simpan Koordinator
       </button>
     </div>
@@ -209,7 +210,7 @@
             </tr>
           </thead>
           <tbody id="koordinatorBody">
-            <!-- Contoh Tampilan Statis/Dinamis ku JavaScript -->
+            <!-- Ditingal tina JavaScript -->
           </tbody>
         </table>
       </div>
@@ -234,10 +235,10 @@
     </div>
 
     <div class="d-flex gap-2">
-      <button onclick="updateKoordinator()" class="btn btn-success w-100 w-md-auto py-2 fw-bold">
+      <button type="button" onclick="updateKoordinator()" class="btn btn-success w-100 w-md-auto py-2 fw-bold">
         Update
       </button>
-      <button onclick="batalEditKoordinator()" class="btn btn-secondary w-100 w-md-auto py-2 fw-bold">
+      <button type="button" onclick="batalEditKoordinator()" class="btn btn-secondary w-100 w-md-auto py-2 fw-bold">
         Batal
       </button>
     </div>
@@ -287,7 +288,7 @@
       </select>
     </div>
 
-    <button onclick="updateData()" class="btn btn-success w-100 w-md-auto py-2 fw-bold mt-2">
+    <button type="button" onclick="updateData()" class="btn btn-success w-100 w-md-auto py-2 fw-bold mt-2">
       Update
     </button>
 
@@ -305,7 +306,7 @@
       </select>
     </div>
 
-    <button onclick="cetakRekap()" class="btn btn-success mb-3 w-100 w-md-auto">
+    <button type="button" onclick="cetakRekap()" class="btn btn-success mb-3 w-100 w-md-auto">
       🖨 Cetak Hasil Filter
     </button>
 
