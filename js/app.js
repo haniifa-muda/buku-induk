@@ -594,7 +594,6 @@ function cetakRekap() {
 // 🔥 BAGIAN HALAMAN KOORDINATOR (CRUD KOORDINATOR)
 // =========================================================
 
-// Memory temporary data (Catetan: Lamun di-refresh bakal balik ka default ieu/bisa disambungkeun kana Sheet)
 let DATA_KOORDINATOR = [
   { koordinator: 'Cilemor Pusat', pj: 'Ust. Ahmad' },
   { koordinator: 'Cilemor Kaler', pj: 'Bpk. Cecep' },
@@ -618,10 +617,10 @@ function muatDataKoordinator() {
         <td>${item.koordinator}</td>
         <td>${item.pj || '-'}</td>
         <td>
-          <button class="btn btn-warning btn-sm me-1" onclick="persiapkanEditKoordinator(${index})">
+          <button type="button" class="btn btn-warning btn-sm me-1" onclick="persiapkanEditKoordinator(${index})">
             Edit
           </button>
-          <button class="btn btn-danger btn-sm" onclick="hapusKoordinator(${index})">
+          <button type="button" class="btn btn-danger btn-sm" onclick="hapusKoordinator(${index})">
             Hapus
           </button>
         </td>
@@ -635,18 +634,23 @@ function simpanKoordinator() {
   const namaInput = document.getElementById('namaKoordinator');
   const pjInput = document.getElementById('pjKoordinator');
 
-  const nama = namaInput ? namaInput.value.trim() : '';
-  const pj = pjInput ? pjInput.value.trim() : '';
+  if (!namaInput || !pjInput) {
+    alert('Elemen form koordinator teu kapendak!');
+    return;
+  }
+
+  const nama = namaInput.value.trim();
+  const pj = pjInput.value.trim();
 
   if (!nama) {
-    alert('Nama Koordinator / Wilayah harus diisi!');
+    alert('Nama Koordinator / Wilayah kedah dieusian!');
     return;
   }
 
   DATA_KOORDINATOR.push({ koordinator: nama, pj: pj });
 
-  if (namaInput) namaInput.value = '';
-  if (pjInput) pjInput.value = '';
+  namaInput.value = '';
+  pjInput.value = '';
 
   alert('Data Koordinator berhasil disimpan!');
   muatDataKoordinator();
@@ -695,5 +699,8 @@ function hapusKoordinator(index) {
   }
 }
 
-// INIT
-loadData();
+// INIT (Muat data alumni sareng koordinator dina awal)
+document.addEventListener("DOMContentLoaded", function() {
+  loadData();
+  muatDataKoordinator();
+});
