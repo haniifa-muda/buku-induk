@@ -41,7 +41,7 @@ async function simpanData() {
 
     hideLoading();
 
-    alert('Data berhasil disimpan');
+    alert('Gagal nyimpen data');
   }
 }
 
@@ -65,18 +65,13 @@ async function loadData() {
     const rows = result.values || [];
 
     // =========================
-    // SIMPAN ROW ASLI (FIX PENTING)
-    // =========================
-    for (let i = 1; i < rows.length; i++) {
-      const sheetRow = i + 1;
-    }
-
-    // =========================
     // SIMPAN GLOBAL (UNTUK FILTER)
     // =========================
     ALL_ROWS = rows;
 
     loadGrafikKoordinator();
+    await muatDataKoordinator(); // 🔥 Auto load tab Koordinator
+    await muatDropdownKoordinator(); // 🔥 Auto load dropdown Koordinator
 
     // =========================
     // TABLE REKAP (WITH ACTION)
@@ -176,23 +171,6 @@ async function loadData() {
 
     const koorBox = document.getElementById('koordinatorRekap');
     if (koorBox) koorBox.innerHTML = htmlKoor;
-
-    // =========================
-    // ISI DROPDOWN FILTER KOORDINATOR (REKAP PAGE)
-    // =========================
-    let setKoor = new Set();
-
-    for (let i = 1; i < rows.length; i++) {
-      if (rows[i][4]) setKoor.add(rows[i][4]);
-    }
-
-    const filter = document.getElementById('filterKoordinator');
-    if (filter) {
-      filter.innerHTML = `<option value="">-- Semua Koordinator --</option>`;
-      setKoor.forEach(k => {
-        filter.innerHTML += `<option value="${k}">${k}</option>`;
-      });
-    }
 
     // =========================
     // RIWAYAT (5 TERBARU)
@@ -315,12 +293,9 @@ async function editData(
 
   if (koordinator === null) return;
 
-  // optional: rapikan input
   koordinator = koordinator.trim();
 
   showLoading();
-
-  console.log("ROW KIRIM KE SERVER:", row);
 
   try {
 
@@ -329,7 +304,7 @@ async function editData(
       mode: 'no-cors',
       body: JSON.stringify({
         action: 'edit',
-        row: Number(row), // 🔥 WAJIB NUMBER
+        row: Number(row),
         nama: nama,
         alamat: alamat,
         no_hp: hp,
@@ -360,9 +335,6 @@ function filterRekap() {
 
     const sheetRow = i + 1;
 
-    // =========================
-    // FILTER LOGIC
-    // =========================
     if (val && data[i][4] !== val) continue;
 
     html += `
@@ -396,23 +368,12 @@ function filterRekap() {
     count++;
   }
 
-  // =========================
-  // UPDATE TABEL
-  // =========================
-  document.getElementById('tbody').innerHTML = html;
+  const tbody = document.getElementById('tbody');
+  if (tbody) tbody.innerHTML = html;
 
-  // =========================
-  // FIX TOTAL (INI YANG BIKIN 0 ERROR)
-  // =========================
-  document.getElementById('totalRekap').innerText = count;
-
-  // =========================
-  // FIX TOTAL KETIKA "SEMUA"
-  // =========================
-  if (!val) {
-    document.getElementById('totalRekap').innerText = ALL_ROWS.length - 1;
-  } else {
-    document.getElementById('totalRekap').innerText = count;
+  const totalRekap = document.getElementById('totalRekap');
+  if (totalRekap) {
+    totalRekap.innerText = !val ? (ALL_ROWS.length - 1) : count;
   }
 }
 
@@ -422,7 +383,6 @@ function loadGrafikKoordinator() {
 
   let koordinatorCount = {};
 
-  // hitung jumlah
   for (let i = 1; i < data.length; i++) {
 
     const koor = data[i][4] || 'Tanpa Koordinator';
@@ -434,13 +394,12 @@ function loadGrafikKoordinator() {
     koordinatorCount[koor]++;
   }
 
-  // ubah jadi array
   const labels = Object.keys(koordinatorCount);
   const values = Object.values(koordinatorCount);
 
   const ctx = document.getElementById('chartKoordinator');
+  if (!ctx) return;
 
-  // hapus chart lama
   if (window.myChart) {
     window.myChart.destroy();
   }
@@ -535,7 +494,7 @@ function cetakRekap() {
       <h2>DATA ALUMNI HANIFA</h2>
 
       <h4>
-        Koordinator
+        Koordinator: 
         ${val ? val : 'Semua Koordinator'}
       </h4>
 
@@ -557,7 +516,6 @@ function cetakRekap() {
 
   for (let i = 1; i < data.length; i++) {
 
-    // FILTER
     if (val && data[i][4] !== val) continue;
 
     html += `
@@ -594,7 +552,7 @@ function cetakRekap() {
 // 🔥 BAGIAN HALAMAN KOORDINATOR (CONNECTED TO GOOGLE SHEETS)
 // =========================================================
 
-// SIMPAN KOORDINATOR KA SPREADSHEET
+// 1. SIMPAN KOORDINATOR KA SPREADSHEET
 async function simpanKoordinator() {
   const namaInput = document.getElementById('namaKoordinator');
   const pjInput = document.getElementById('pjKoordinator');
@@ -627,10 +585,9 @@ async function simpanKoordinator() {
       body: JSON.stringify(payload)
     });
 
-    // ⬇️ DISIMPEN DINA BAGIAN IEU ⬇️
     setTimeout(async () => {
       await loadData();
-      await muatDataKoordinator(); // 🔥 Ngamuat deui data koordinator saatos simpan
+      await muatDataKoordinator(); // 🔥 Refresh data koordinator
       alert('Data Koordinator berhasil disimpan!');
       
       namaInput.value = '';
@@ -651,7 +608,6 @@ async function muatDataKoordinator() {
   if (!tbody) return;
 
   try {
-    // Muka Sheet 'Koordinator' langsung ti Google Sheets API
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Koordinator!A:C?key=${API_KEY}`;
     const response = await fetch(url);
     const result = await response.json();
@@ -689,7 +645,40 @@ async function muatDataKoordinator() {
   }
 }
 
-// 3. EDIT & HAPUS KOORDINATOR PROMPT
+// 3. MUAT DROPDOWN FILTER & FORM INPUT TI TAB KOORDINATOR
+async function muatDropdownKoordinator() {
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Koordinator!B2:B?key=${API_KEY}`;
+    const response = await fetch(url);
+    const result = await response.json();
+    const rows = result.values || [];
+
+    const listKoor = rows.map(r => r[0]).filter(Boolean);
+
+    // Update Dropdown Filter Rekap
+    const filterSelect = document.getElementById('filterKoordinator');
+    if (filterSelect) {
+      filterSelect.innerHTML = `<option value="">-- Semua Koordinator --</option>`;
+      listKoor.forEach(k => {
+        filterSelect.innerHTML += `<option value="${k}">${k}</option>`;
+      });
+    }
+
+    // Update Dropdown Form Input Alumni
+    const inputSelect = document.getElementById('koordinator');
+    if (inputSelect) {
+      inputSelect.innerHTML = `<option value="">-- Pilih Koordinator --</option>`;
+      listKoor.forEach(k => {
+        inputSelect.innerHTML += `<option value="${k}">${k}</option>`;
+      });
+    }
+
+  } catch (err) {
+    console.log("Error muat dropdown koordinator:", err);
+  }
+}
+
+// 4. EDIT KOORDINATOR PROMPT
 async function editKoordinatorPrompt(namaLama) {
   const namaBaru = prompt('Edit Nama Koordinator:', namaLama);
   if (!namaBaru || namaBaru.trim() === namaLama) return;
@@ -709,6 +698,7 @@ async function editKoordinatorPrompt(namaLama) {
 
     setTimeout(async () => {
       await loadData();
+      await muatDataKoordinator();
       alert('Data Koordinator berhasil di-update!');
       hideLoading();
     }, 1500);
@@ -718,6 +708,7 @@ async function editKoordinatorPrompt(namaLama) {
   }
 }
 
+// 5. HAPUS KOORDINATOR PROMPT
 async function hapusKoordinatorPrompt(namaKoor) {
   if (!confirm(`Yakin hoyong ngahapus Koordinator "${namaKoor}"?`)) return;
 
@@ -735,6 +726,7 @@ async function hapusKoordinatorPrompt(namaKoor) {
 
     setTimeout(async () => {
       await loadData();
+      await muatDataKoordinator();
       alert('Data Koordinator berhasil dihapus!');
       hideLoading();
     }, 1500);
