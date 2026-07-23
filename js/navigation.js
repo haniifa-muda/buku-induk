@@ -2,8 +2,8 @@ function tampilHalaman(halaman, menuElement) {
 
   // sembunyikan semua halaman (termasuk koordinatorPage)
   document.getElementById('dashboardPage').style.display = 'none';
-  document.getElementById('inputPage').style.display = 'none';
   document.getElementById('koordinatorPage').style.display = 'none';
+  document.getElementById('inputPage').style.display = 'none';
   document.getElementById('rekapPage').style.display = 'none';
 
   // sembunyikan form edit jika sedang terbuka
