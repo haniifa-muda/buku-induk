@@ -8,24 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
 async function simpanArwah() {
   const namaInput = document.getElementById('namaArwah');
   const binInput = document.getElementById('binArwah');
+  const ortuInput = document.getElementById('ortuArwah');
 
   const namaVal = namaInput ? namaInput.value.trim().replace(/\s+/g, ' ') : '';
-  const binVal = binInput ? binInput.value.trim().replace(/\s+/g, ' ') : '';
+  const binVal = binInput ? binInput.value : 'bin';
+  const ortuVal = ortuInput ? ortuInput.value.trim().replace(/\s+/g, ' ') : '';
 
   if (!namaVal) {
     alert('⚠️ Ngaran Almarhum/ah wajib dieusian!');
     return;
   }
 
-  // Format nami + bin/binti (Contoh: "Aki Kholil bin Jayem")
+  // Format hasilna: "Aki Kholil bin Jayem"
   let namaLengkap = namaVal;
-  if (binVal) {
-    // Mun pangguna can nulis "bin" atawa "binti", otomatis ditambahkeun "bin"
-    if (!binVal.toLowerCase().startsWith('bin') && !binVal.toLowerCase().startsWith('binti')) {
-      namaLengkap += ` bin ${binVal}`;
-    } else {
-      namaLengkap += ` ${binVal}`;
-    }
+  if (ortuVal) {
+    namaLengkap += ` ${binVal} ${ortuVal}`;
   }
 
   // Cek duplikat nami
@@ -58,7 +55,7 @@ async function simpanArwah() {
 
       alert('✅ Data Arwah berhasil disimpan!');
       if (namaInput) namaInput.value = '';
-      if (binInput) binInput.value = '';
+      if (ortuInput) ortuInput.value = '';
 
       hideLoading();
     }, 1500);
