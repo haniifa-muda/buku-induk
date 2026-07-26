@@ -1,15 +1,45 @@
 async function simpanData() {
+  const namaInput = document.getElementById('nama');
+  const alamatInput = document.getElementById('alamat');
+  const hpInput = document.getElementById('no_hp');
+  const koorInput = document.getElementById('koordinator');
 
+  const namaVal = namaInput ? namaInput.value.trim() : '';
+  const alamatVal = alamatInput ? alamatInput.value.trim() : '';
+  const hpVal = hpInput ? hpInput.value.trim() : '';
+  const koorVal = koorInput ? koorInput.value.trim() : '';
+
+  // 1. Validasi Input Kosong
+  if (!namaVal || !koorVal) {
+    alert('Nama sareng Koordinator wajib dieusian!');
+    return;
+  }
+
+  // 2. 🔥 CEGAH DATA DUPLIKAT DINA KOORDINATOR ANU SAMI
+  // Nyemak ka array ALL_ROWS anu tos dimuat ti Google Sheets
+  const dataSami = ALL_ROWS.find(row => {
+    const namaDiSheet = (row[1] || '').trim().toLowerCase();
+    const koorDiSheet = (row[4] || '').trim().toLowerCase();
+
+    // Lamun Nama jeung Koordinatorna sami persis (tidak membedakan huruf besar/kecil)
+    return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
+  });
+
+  if (dataSami) {
+    alert(`⚠️ DATA DUPLIKAT!\n\nNama "${namaVal}" tos aya dina Koordinator "${koorVal}".\nData henteu tiasa disimpen deui.`);
+    return; // Henteu ngalanjutkeun proses simpan
+  }
+
+  // 3. Proses Simpan Ka Google Sheets
   showLoading();
 
   try {
-
     const payload = {
       action: 'add',
-      nama: document.getElementById('nama').value,
-      alamat: document.getElementById('alamat').value,
-      no_hp: document.getElementById('no_hp').value,
-      koordinator: document.getElementById('koordinator').value
+      nama: namaVal,
+      alamat: alamatVal,
+      no_hp: hpVal,
+      koordinator: koorVal
     };
 
     await fetch(WRITE_URL, {
@@ -18,33 +48,27 @@ async function simpanData() {
       body: JSON.stringify(payload)
     });
 
-    // tunggu sebentar supaya spreadsheet update
+    // Tunggu sebentar supados spreadsheet update
     setTimeout(async () => {
-
       await loadData();
 
-      alert('Data berhasil disimpan');
+      alert('Data berhasil disimpan!');
 
-      // kosongkan form
-      document.getElementById('nama').value = '';
-      document.getElementById('alamat').value = '';
-      document.getElementById('no_hp').value = '';
-      document.getElementById('koordinator').value = '';
+      // Kosongkeun form saatos simpan
+      if (namaInput) namaInput.value = '';
+      if (alamatInput) alamatInput.value = '';
+      if (hpInput) hpInput.value = '';
+      if (koorInput) koorInput.value = '';
 
       hideLoading();
-
     }, 1500);
 
   } catch (err) {
-
     console.log(err);
-
     hideLoading();
-
     alert('Gagal nyimpen data');
   }
 }
-
 
 // =========================
 // LOAD DATA
