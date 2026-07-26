@@ -4,6 +4,7 @@ async function simpanData() {
   const hpInput = document.getElementById('no_hp');
   const koorInput = document.getElementById('koordinator');
 
+  // Bersihan spasi di awal, tungtung, jeung spasi ganda di tengah
   const namaVal = namaInput ? namaInput.value.trim().replace(/\s+/g, ' ') : '';
   const alamatVal = alamatInput ? alamatInput.value.trim() : '';
   const hpVal = hpInput ? hpInput.value.trim() : '';
@@ -11,40 +12,37 @@ async function simpanData() {
 
   // 1. Validasi Input Kosong
   if (!namaVal || !koorVal) {
-    alert('Nama sareng Koordinator wajib dieusian!');
+    alert('⚠️ Ngaran sareng Koordinator wajib dieusian!');
     return;
   }
 
-  // 2. 🔥 CEGAH DATA DUPLIKAT
-  console.log("Data ALL_ROWS ayeuna:", ALL_ROWS); // Cobi tingali dina Console F12
-
-  const dataSami = ALL_ROWS.find(row => {
-    // Upami ALL_ROWS wujudna Array (misal: [ID, Nama, Alamat, NoHP, Koordinator])
-    if (Array.isArray(row)) {
-      const namaDiSheet = (row[1] || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
-      const koorDiSheet = (row[4] || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
-
-      return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
-    } 
-    // Upami ALL_ROWS wujudna Object (misal: { nama: "...", koordinator: "..." })
-    else if (typeof row === 'object' && row !== null) {
-      const namaDiSheet = (row.nama || row.Nama || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
-      const koorDiSheet = (row.koordinator || row.Koordinator || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
-
-      return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
-    }
-    return false;
-  });
-
-  if (dataSami) {
-    alert(`⚠️ DATA DUPLIKAT!\n\nNama "${namaVal}" tos aya dina Koordinator "${koorVal}".\nData henteu tiasa disimpen deui.`);
-    return; // Eureunkeun proses simpan
-  }
-
-  // 3. Proses Simpan Ka Google Sheets
   showLoading();
 
   try {
+    // 2. 🔥 AMBIL DATA PANGANYARNA TI SPREADSHEET PIKEUN NGACEK DUPLIKAT
+    const urlCheck = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A:E?key=${API_KEY}`;
+    const resCheck = await fetch(urlCheck);
+    const dataCheck = await resCheck.json();
+    const rows = dataCheck.values || [];
+
+    // 3. 🔥 CEK CEGAH DUPLIKAT DINA KOORDINATOR ANU SAMI
+    const isDuplicate = rows.some((row, index) => {
+      if (index === 0) return false; // Skip header
+
+      const namaDiSheet = (row[1] || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
+      const koorDiSheet = (row[4] || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
+
+      // Bandingkeun Ngaran jeung Koordinator
+      return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
+    });
+
+    if (isDuplicate) {
+      hideLoading();
+      alert(`⚠️ DATA DUPLIKAT!\n\nNgaran "${namaVal}" tos aya dina Koordinator "${koorVal}".\nData henteu tiasa disimpen deui.`);
+      return; // Eureunkeun proses simpan
+    }
+
+    // 4. PROSES SIMPAN KA GOOGLE SHEETS
     const payload = {
       action: 'add',
       nama: namaVal,
@@ -59,13 +57,12 @@ async function simpanData() {
       body: JSON.stringify(payload)
     });
 
-    // Tunggu sebentar supados spreadsheet update
     setTimeout(async () => {
       await loadData();
 
-      alert('Data berhasil disimpan!');
+      alert('✅ Data berhasil disimpan!');
 
-      // Kosongkeun form
+      // Kosongkeun form saatos simpan
       if (namaInput) namaInput.value = '';
       if (alamatInput) alamatInput.value = '';
       if (hpInput) hpInput.value = '';
@@ -77,7 +74,7 @@ async function simpanData() {
   } catch (err) {
     console.error(err);
     hideLoading();
-    alert('Gagal nyimpen data');
+    alert('❌ Gagal nyimpen data');
   }
 }
 
