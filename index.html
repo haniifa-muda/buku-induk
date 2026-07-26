@@ -317,8 +317,16 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label fw-semibold">Bin / Binti</label>
-      <input type="text" id="binArwah" class="form-control" placeholder="Contoh: Fulan / Jayem">
+      <label class="form-label fw-semibold">Jenis (Bin / Binti)</label>
+      <select id="binArwah" class="form-select">
+        <option value="bin">bin (Pamenang/Laki-laki)</option>
+        <option value="binti">binti (Istri/Perempuan)</option>
+      </select>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Nama Orang Tua (Bapak)</label>
+      <input type="text" id="ortuArwah" class="form-control" placeholder="Eusian nama bapa/orang tua">
     </div>
 
     <button type="button" onclick="simpanArwah()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
