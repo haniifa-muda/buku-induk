@@ -71,6 +71,7 @@ async function simpanArwah() {
 }
 
 // 2. MUAT DATA ARWAH TI SPREADSHEET
+// MUAT DATA ARWAH TI SPREADSHEET
 async function muatDataArwah() {
   try {
     const response = await fetch(`${WRITE_URL}?action=getArwah`);
@@ -79,13 +80,20 @@ async function muatDataArwah() {
     ALL_ARWAH = Array.isArray(data) ? data : [];
 
     const tbody = document.getElementById('arwahBody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
+    const totalElem = document.getElementById('totalArwah');
 
     const filteredRows = ALL_ARWAH.filter((row, index) => {
       if (index === 0 && (row[0] === 'No' || row[1] === 'Nama Almarhum/ah')) return false;
       return row && row.length > 1 && row[1];
     });
+
+    // UPDATE ANGKA REKAP CARD
+    if (totalElem) {
+      totalElem.innerText = filteredRows.length;
+    }
+
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
     if (filteredRows.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" class="text-center">Tacan aya data arwah</td></tr>';
