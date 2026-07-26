@@ -66,6 +66,12 @@
         </li>
 
         <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0)" onclick="tampilHalaman('diniyahPage', this)">
+            Alumni Diniyah
+          </a>
+        </li>
+
+        <li class="nav-item">
           <a class="nav-link" href="javascript:void(0)" onclick="tampilHalaman('arwahPage', this)">
             Daftar Arwah
           </a>
@@ -303,6 +309,76 @@
 
   </div>
 
+  <!-- ================= HALAMAN ALUMNI DINIYAH ================= -->
+  <div id="diniyahPage" style="display:none;">
+    <h3 class="mb-3 fw-bold">🎓 Alumni Diniyah</h3>
+  
+    <!-- CARD REKAP JUMLAH -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-4">
+        <div class="card p-3 shadow-sm border-0 bg-success text-white">
+          <h5 class="fs-6 opacity-75 mb-1">Total Alumni Diniyah</h5>
+          <h2 id="totalDiniyah" class="fw-bold mb-0">0</h2>
+        </div>
+      </div>
+    </div>
+  
+    <!-- FORM INPUT DINIYAH -->
+    <div class="card p-3 p-md-4 mb-4 shadow-sm border-0">
+      <h5 class="fw-bold mb-3">Input Data Alumni Diniyah</h5>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Nama Lengkap</label>
+        <input type="text" id="namaDiniyah" class="form-control" placeholder="Eusian nama lengkap">
+      </div>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Alamat</label>
+        <textarea id="alamatDiniyah" class="form-control" rows="3" placeholder="Eusian alamat lengkap"></textarea>
+      </div>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">No HP / Whatsapp</label>
+        <input type="tel" id="noHpDiniyah" class="form-control" placeholder="Contoh: 08123456789">
+      </div>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Angkatan / Tahun Lulus</label>
+        <input type="text" id="angkatanDiniyah" class="form-control" placeholder="Contoh: Angkatan 2023">
+      </div>
+  
+      <button type="button" onclick="simpanDiniyah()" class="btn btn-success w-100 w-md-auto py-2 fw-bold">
+        Simpan Data Diniyah
+      </button>
+    </div>
+  
+    <!-- TABEL REKAP ALUMNI DINIYAH -->
+    <div class="card shadow-sm border-0 p-3 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">📋 Daftar Alumni Diniyah</h5>
+        <button type="button" class="btn btn-outline-success" onclick="cetakDiniyah()">
+          🖨️ Cetak Data
+        </button>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead class="table-success">
+            <tr>
+              <th style="width: 5%;">No</th>
+              <th>Nama</th>
+              <th>Alamat</th>
+              <th>No HP</th>
+              <th>Angkatan</th>
+              <th style="width: 15%;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="diniyahBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
   <!-- ================= HALAMAN DAFTAR ARWAH ================= -->
 <div id="arwahPage" style="display:none;">
   <h3 class="mb-3 fw-bold">🕯️ Daftar Arwah</h3>
