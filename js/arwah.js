@@ -19,7 +19,7 @@ async function simpanArwah() {
     return;
   }
 
-  // Format hasilna: "Aki Kholil bin Jayem"
+  // Format hasilna: "Aki Kholil bin Jayem" atanapi "Nyi Maryam binti Sukra"
   let namaLengkap = namaVal;
   if (ortuVal) {
     namaLengkap += ` ${binVal} ${ortuVal}`;
@@ -54,7 +54,10 @@ async function simpanArwah() {
       await muatDataArwah();
 
       alert('✅ Data Arwah berhasil disimpan!');
+      
+      // Reset kabeh input form arwah
       if (namaInput) namaInput.value = '';
+      if (binInput) binInput.value = 'bin';
       if (ortuInput) ortuInput.value = '';
 
       hideLoading();
