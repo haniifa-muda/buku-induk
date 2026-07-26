@@ -4,7 +4,7 @@ async function simpanData() {
   const hpInput = document.getElementById('no_hp');
   const koorInput = document.getElementById('koordinator');
 
-  const namaVal = namaInput ? namaInput.value.trim() : '';
+  const namaVal = namaInput ? namaInput.value.trim().replace(/\s+/g, ' ') : '';
   const alamatVal = alamatInput ? alamatInput.value.trim() : '';
   const hpVal = hpInput ? hpInput.value.trim() : '';
   const koorVal = koorInput ? koorInput.value.trim() : '';
@@ -15,19 +15,30 @@ async function simpanData() {
     return;
   }
 
-  // 2. 🔥 CEGAH DATA DUPLIKAT DINA KOORDINATOR ANU SAMI
-  // Nyemak ka array ALL_ROWS anu tos dimuat ti Google Sheets
-  const dataSami = ALL_ROWS.find(row => {
-    const namaDiSheet = (row[1] || '').trim().toLowerCase();
-    const koorDiSheet = (row[4] || '').trim().toLowerCase();
+  // 2. 🔥 CEGAH DATA DUPLIKAT
+  console.log("Data ALL_ROWS ayeuna:", ALL_ROWS); // Cobi tingali dina Console F12
 
-    // Lamun Nama jeung Koordinatorna sami persis (tidak membedakan huruf besar/kecil)
-    return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
+  const dataSami = ALL_ROWS.find(row => {
+    // Upami ALL_ROWS wujudna Array (misal: [ID, Nama, Alamat, NoHP, Koordinator])
+    if (Array.isArray(row)) {
+      const namaDiSheet = (row[1] || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
+      const koorDiSheet = (row[4] || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
+
+      return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
+    } 
+    // Upami ALL_ROWS wujudna Object (misal: { nama: "...", koordinator: "..." })
+    else if (typeof row === 'object' && row !== null) {
+      const namaDiSheet = (row.nama || row.Nama || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
+      const koorDiSheet = (row.koordinator || row.Koordinator || '').toString().trim().replace(/\s+/g, ' ').toLowerCase();
+
+      return namaDiSheet === namaVal.toLowerCase() && koorDiSheet === koorVal.toLowerCase();
+    }
+    return false;
   });
 
   if (dataSami) {
     alert(`⚠️ DATA DUPLIKAT!\n\nNama "${namaVal}" tos aya dina Koordinator "${koorVal}".\nData henteu tiasa disimpen deui.`);
-    return; // Henteu ngalanjutkeun proses simpan
+    return; // Eureunkeun proses simpan
   }
 
   // 3. Proses Simpan Ka Google Sheets
@@ -54,7 +65,7 @@ async function simpanData() {
 
       alert('Data berhasil disimpan!');
 
-      // Kosongkeun form saatos simpan
+      // Kosongkeun form
       if (namaInput) namaInput.value = '';
       if (alamatInput) alamatInput.value = '';
       if (hpInput) hpInput.value = '';
@@ -64,7 +75,7 @@ async function simpanData() {
     }, 1500);
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     hideLoading();
     alert('Gagal nyimpen data');
   }
