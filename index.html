@@ -303,6 +303,56 @@
 
   </div>
 
+  <!-- ================= HALAMAN DAFTAR ARWAH ================= -->
+  <div id="arwahPage" style="display:none;">
+    <h3 class="mb-3 fw-bold">🕯️ Daftar Arwah</h3>
+  
+    <!-- FORM INPUT ARWAH -->
+    <div class="card p-3 p-md-4 mb-4 shadow-sm border-0">
+      <h5 class="fw-bold mb-3">Input Data Arwah</h5>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Nama Almarhum / Almarhumah</label>
+        <input type="text" id="namaArwah" class="form-control" placeholder="Eusian nama almarhum/almarhumah">
+      </div>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Bin / Binti</label>
+        <input type="text" id="binArwah" class="form-control" placeholder="Contoh: Fulan bin Fulan">
+      </div>
+  
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Koordinator / Ahli Waris</label>
+        <select id="koordinatorArwah" class="form-select">
+          <option value="">-- Pilih Koordinator --</option>
+        </select>
+      </div>
+  
+      <button type="button" onclick="simpanArwah()" class="btn btn-primary w-100 w-md-auto py-2 fw-bold">
+        Simpan Data Arwah
+      </button>
+    </div>
+  
+    <!-- TABEL RIWAYAT / DAFTAR ARWAH -->
+    <div class="card shadow-sm border-0 p-3 mb-4">
+      <h5 class="mb-3 fw-bold">📋 Data Arwah Kasimpen</h5>
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th>No</th>
+              <th>Nama Almarhum/ah</th>
+              <th>Bin / Binti</th>
+              <th>Koordinator</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="arwahBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= REKAP ================= -->
   <div id="rekapPage" style="display:none;">
 
