@@ -140,3 +140,111 @@ async function hapusArwah(rowNum) {
     alert('❌ Gagal ngahapus data arwah');
   }
 }
+
+// 4. FITUR CETAK DAFTAR ARWAH (LAYOUT MULTI-KOLOM)
+function cetakArwah() {
+  // Saring data arwah (miceun header)
+  const filteredRows = ALL_ARWAH.filter((row, index) => {
+    if (index === 0 && (row[0] === 'No' || row[1] === 'Nama Almarhum/ah')) return false;
+    return row && row.length > 1 && row[1];
+  });
+
+  if (filteredRows.length === 0) {
+    alert('⚠️ Tacan aya data arwah anu tiasa dicetak!');
+    return;
+  }
+
+  // Nyusun list HTML pikeun dicetak
+  let listItems = '';
+  filteredRows.forEach((row, idx) => {
+    listItems += `
+      <div class="arwah-item">
+        <span class="no">${idx + 1}.</span>
+        <span class="nama">${row[1]}</span>
+      </div>
+    `;
+  });
+
+  // Buka jandela anyar pikeun cetak
+  const printWindow = window.open('', '_blank');
+  
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+      <meta charset="UTF-8">
+      <title>Cetak Daftar Arwah</title>
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 15mm;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          color: #000;
+          margin: 0;
+          padding: 0;
+        }
+        h2.judul {
+          text-align: center;
+          margin-top: 0;
+          margin-bottom: 20px;
+          font-size: 22px;
+          text-transform: uppercase;
+          border-bottom: 2px solid #000;
+          padding-bottom: 8px;
+        }
+        
+        /* LAYOUT MULTI-KOLOM (Otomatis uih ka luhur belah katuhu) */
+        .container-arwah {
+          column-count: 3;           /* Dibagi janten 3 kolom */
+          column-gap: 25px;          /* Jarak antarkolom */
+          column-rule: 1px solid #ccc; /* Garis pembatas antarkolom */
+          width: 100%;
+        }
+        
+        .arwah-item {
+          break-inside: avoid;       /* Mencegah teks terpotong di tengah kolom */
+          font-size: 13px;
+          padding: 4px 0;
+          border-bottom: 1px dotted #ddd;
+          display: flex;
+        }
+        .arwah-item .no {
+          width: 28px;
+          font-weight: bold;
+          flex-shrink: 0;
+        }
+        .arwah-item .nama {
+          flex-grow: 1;
+        }
+
+        @media print {
+          body {
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      </style>
+    </head>
+    <body>
+
+      <h2 class="judul">Daftar Arwah</h2>
+
+      <div class="container-arwah">
+        ${listItems}
+      </div>
+
+      <script>
+        window.onload = function() {
+          window.print();
+          window.onafterprint = function() {
+            window.close();
+          };
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+}
