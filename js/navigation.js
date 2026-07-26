@@ -1,38 +1,50 @@
 function tampilHalaman(halaman, menuElement) {
 
-  // sembunyikan semua halaman (termasuk koordinatorPage)
-  document.getElementById('dashboardPage').style.display = 'none';
-  document.getElementById('inputPage').style.display = 'none';
-  document.getElementById('koordinatorPage').style.display = 'none';
-  document.getElementById('rekapPage').style.display = 'none';
+  // 1. Sembunyikan SEMUA halaman utama (kalebet diniyah, arwah, dll)
+  const sadayaHalaman = [
+    'dashboardPage',
+    'inputPage',
+    'koordinatorPage',
+    'rekapPage',
+    'diniyahPage',
+    'arwahPage'
+  ];
 
-  // sembunyikan form edit jika sedang terbuka
+  sadayaHalaman.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // 2. Sembunyikan form edit jika sedang terbuka
   const editBox = document.getElementById('editBox');
   if (editBox) editBox.style.display = 'none';
 
   const editKoordinatorBox = document.getElementById('editKoordinatorBox');
   if (editKoordinatorBox) editKoordinatorBox.style.display = 'none';
 
-  // tampilkan halaman aktif
+  // 3. Tampilkan halaman tujuan
   const pageTujuan = document.getElementById(halaman);
   if (pageTujuan) {
     pageTujuan.style.display = 'block';
   }
 
-  // hapus active semua menu
+  // 4. Hapus class active di semua menu navbar
   const semuaMenu = document.querySelectorAll('.nav-link');
-
   semuaMenu.forEach(function(menu) {
     menu.classList.remove('active-menu');
   });
 
-  // tambahkan active
+  // 5. Tambahkan class active ke menu yang diklik
   if (menuElement) {
     menuElement.classList.add('active-menu');
   }
 
-  // Jika membuka halaman koordinator, muat datanya otomatis
+  // 6. Triggers muat data otomatis jika diperlukan
   if (halaman === 'koordinatorPage' && typeof muatDataKoordinator === 'function') {
     muatDataKoordinator();
+  }
+  
+  if (halaman === 'diniyahPage' && typeof muatDataDiniyah === 'function') {
+    muatDataDiniyah();
   }
 }
